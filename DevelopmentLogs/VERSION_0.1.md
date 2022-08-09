@@ -2,7 +2,6 @@
 ## Relevant Commits
 | Commit | Date |
 | - | - |
-| - | 03 August 2022 |
 ## Summary
 A basic Jupyter Notebook was created with a simple example of web scrapping from Google using the web scrapping framework, [Scrapy](https://scrapy.org/).
 ## Results
