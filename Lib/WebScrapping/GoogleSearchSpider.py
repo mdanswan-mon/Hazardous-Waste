@@ -17,6 +17,7 @@ class GoogleSearch(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):        
+        print(f"Running Google Search at {response.url}")
         search_items = response.css('.fP1Qef').extract()
         searches = dict()
         for search in search_items:
