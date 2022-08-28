@@ -19,12 +19,10 @@ class GoogleSearch(scrapy.Spider):
     def parse(self, response):        
         print(f"Running Google Search at {response.url}")
         search_items = response.css('.fP1Qef').extract()
-        searches = dict()
+        searches = []
         for search in search_items:
             selector = scrapy.Selector(text=search)
-            title = selector.xpath('//a/h3/div//text()').get()
             link = selector.css('a::attr(href)').get()
             link = urllib.parse.parse_qs(urllib.parse.urlsplit(link).query)['q'][0]
-            if title not in searches.keys():
-                searches[title] = link
-        yield searches
+            searches.append(link)
+        yield { "urls": searches }

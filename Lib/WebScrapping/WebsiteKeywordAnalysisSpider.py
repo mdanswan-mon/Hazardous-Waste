@@ -6,7 +6,6 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
     
     def __init__(self, *args, **kwargs):
         self.base_url = kwargs['base_url']
-        self.website = kwargs['website']
         super().__init__(self.name, **kwargs)
     
     def start_requests(self):
@@ -14,6 +13,7 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         
     def parse(self, response):
         print(f"Running keyword collection at {response.url}")
+        title = str.strip(response.css("title::text").extract_first());
         elements = response.css('div::text, h1::text, h2::text, h3::text, h4::text, h5::text, h6::text, a::text, p::text').extract()
         combined_string = ' '.join(elements)
-        yield { self.website: combined_string }
+        yield { "content" : [response.url, title, combined_string] }
