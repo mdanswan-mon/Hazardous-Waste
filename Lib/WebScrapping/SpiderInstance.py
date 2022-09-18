@@ -1,14 +1,19 @@
+import os
 import sys
 from scrapy.crawler import CrawlerProcess
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
+from scrapy.utils.project import get_project_settings
 
 def create_and_run_spider(spider_class, results_callback, **kwargs):
     
     if "twisted.internet.reactor" in sys.modules:
         del sys.modules["twisted.internet.reactor"]
-            
+
+    os.environ.setdefault('SCRAPY_SETTINGS_MODULE', 'Lib.WebScrapping.settings')
+    settings = get_project_settings()
+
     dispatcher.connect(results_callback, signal=signals.item_scraped)
-    process = CrawlerProcess()
+    process = CrawlerProcess(settings=settings)
     process.crawl(spider_class, **kwargs)
     process.start()

@@ -1,0 +1,25 @@
+# Supported file types by the textract library
+# Abstracted to an external file for easy extendability
+.csv=.csv,text/csv
+.doc=.doc,application/msword
+.docx=.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document
+.eml=.eml
+.epub=application/epub+zip
+.gif=.gif,image/gif
+.jpg=.jpg,.jpeg,image/jpeg
+.json=.json,application/json
+.html=.html,.htm,text/html
+.mp3=.mp3,audio/mpeg
+.msg=.msg
+.odt=.odt,application/vnd.oasis.opendocument.text
+.ogg=.ogg,audio/ogg
+.pdf=.pdf,application/pdf
+.png=.png,image/png
+.pptx=.pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation
+.ps=.ps
+.rtf=.rtf,application/rtf
+.tiff=.tiff,image/tiff
+.txt=.txt,text/plain
+.wav=.wav,audio/wav
+.xlsx=.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+.xls=.xls,application/vnd.ms-excel

@@ -9,6 +9,7 @@ class GoogleSearch(scrapy.Spider):
         self.base_url = kwargs['base_url']
         self.tags = kwargs['tags']
         self.pages = kwargs['pages']
+        self.websites_to_ignore = [website.strip() for website in open('Resources/websites-to-ignore.txt', 'r').readlines() if not website.startswith("#")]
         super().__init__(self.name, **kwargs)
     
     def start_requests(self):
@@ -23,6 +24,7 @@ class GoogleSearch(scrapy.Spider):
         for search in search_items:
             selector = scrapy.Selector(text=search)
             link = selector.css('a::attr(href)').get()
-            link = urllib.parse.parse_qs(urllib.parse.urlsplit(link).query)['q'][0]
-            searches.append(link)
+            if not any(website in link for website in self.websites_to_ignore):
+                link = urllib.parse.parse_qs(urllib.parse.urlsplit(link).query)['q'][0]
+                searches.append(link)
         yield { "urls": searches }

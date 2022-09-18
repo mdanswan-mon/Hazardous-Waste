@@ -11,21 +11,30 @@ def get_tag_corpus(tags, pages):
 
     def google_search_results_listener(signal, sender, item, response, spider):
         nonlocal webpages
-        urls = item['urls']
-        for url in urls:
-            webpages.append(Webpage(url=url))
-        
+        urls = item['urls'] if 'urls' in item.keys() else None
+        if urls is not None:
+            for url in urls:
+                webpages.append(Webpage(url=url))
+
     def keyword_analysis_results_listener(signal, sender, item, response, spider):
         nonlocal webpages
         webpage_content = item['content']
         for webpage in webpages:
             if (webpage.url == webpage_content[0]):
-                webpage.title = webpage_content[1]
-                webpage.textual_content = webpage_content[2]
+                webpage.type = webpage_content[1]
+                webpage.title = webpage_content[2]
+                webpage.textual_content = webpage_content[3]
+                break
 
     create_and_run_spider(GoogleSearch, google_search_results_listener, base_url="https://www.google.com.au/search?q={0}&start={1}", tags=tags, pages=pages)
 
     for webpage in webpages:
         create_and_run_spider(WebsiteKeywordAnalysis, keyword_analysis_results_listener, base_url=webpage.url)
-        
-    return webpages
+
+    valid_webpages: list[Webpage] = list()
+
+    for webpage in webpages:
+        if len(webpage.title) > 0 and len(webpage.textual_content) > 0 and len(webpage.textual_content) > 0:
+            valid_webpages.append(webpage)
+
+    return valid_webpages
