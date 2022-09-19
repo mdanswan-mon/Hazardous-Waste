@@ -253,7 +253,7 @@ couldn't
 couldnt
 course
 cr
-`cross
+cross
 cry
 cs
 cu
@@ -442,7 +442,7 @@ grouped
 grouping
 groups
 gs
-`gt
+gt
 gu
 gw
 gy
@@ -518,7 +518,7 @@ i'll
 i'm
 i've
 i.e.
-`id
+id
 ie
 if
 ignored
@@ -635,7 +635,7 @@ low
 lower
 lr
 ls
-`lt
+lt
 ltd
 lu
 lv
@@ -663,7 +663,7 @@ meanwhile
 member
 members
 men
-`menu
+menu
 merely
 mg
 mh
@@ -711,7 +711,7 @@ myse
 mz
 n
 na
-`name
+name
 namely
 nay
 nc
@@ -890,7 +890,7 @@ really
 reasonably
 recent
 recently
-`ref
+ref
 refs
 regarding
 regardless
@@ -1124,7 +1124,7 @@ tn
 to
 today
 together
-`toggle
+toggle
 too
 took
 top
@@ -1280,8 +1280,8 @@ why'd
 why'll
 why's
 widely
-`width
-`height
+width
+height
 will
 willing
 wish
