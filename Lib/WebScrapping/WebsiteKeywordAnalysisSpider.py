@@ -1,8 +1,9 @@
 import scrapy
 import textract
 import os
+import io
 import tempfile
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfFileReader
 from urllib.parse import urlparse
 
 class WebsiteKeywordAnalysis(scrapy.Spider):
@@ -19,38 +20,54 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         
     def parse(self, response):
         print(f"Running keyword collection at {response.url}")
-        title, combined_string = '', ''
         
         file_types = self.get_file_type(response)
         selected_file_type = next((sup_file_type for (sup_file_type, sup_file_type_strs) in self.supported_file_types.items() if self.get_match_in_lists(sup_file_type_strs, file_types)), None)
         
         if selected_file_type:
+            
             clean_file_type = selected_file_type.removeprefix(".").capitalize()
+            title, textual_content = '', ''
             
-            temp_file, path = tempfile.mkstemp(suffix=selected_file_type)
-            try:
-                with os.fdopen(temp_file, 'wb') as temp:
-                    temp.write(response.body)
-            finally:
-                combined_string = textract.process(path).decode('utf-8')
-                
-            title = self.get_title(response, clean_file_type, path)
-            
-            os.remove(path)
-            
-            if len(clean_file_type) > 0 and len(title) > 0 and len(combined_string) > 0:
-                yield { "content" : [response.url, clean_file_type, title, combined_string] }
-        
-    def get_title(self, response, file_type, file_path):
-        split_url = response.url.split('/')
+            if clean_file_type in ['Html', 'Htm']:
+                title, textual_content = self.parse_document_as_html(response)
+            elif clean_file_type in ['Pdf']:
+                title, textual_content = self.parse_document_as_pdf(response)
+            else:
+                title, textual_content = self.parse_document_general(response, clean_file_type)
+
+            if len(clean_file_type) > 0 and len(title) > 0 and len(textual_content) > 0:
+                yield { "content" : [response.url, clean_file_type, title, textual_content] }
+    
+    def get_document_title_from_url(self, url):
+        split_url = url.split('/')
         url_title = split_url[-1].strip()
-        if "html" in file_type.lower():
-            return response.css('title::text').extract_first().strip() or url_title
-        elif "pdf" in file_type.lower():
-            reader = PdfReader(file_path)
-            return reader.getDocumentInfo().title.strip() or url_title
-        else:
-            return url_title
+        return url_title
+    
+    def parse_document_general(self, response, file_type):
+        title = self.get_document_title_from_url(response.url)
+        temp_file, path = tempfile.mkstemp(suffix=file_type)
+        try:
+            with os.fdopen(temp_file, 'wb') as temp:
+                temp.write(response.body)
+        finally:
+            textual_content = textract.process(path).decode('utf-8')
+            os.remove(path)
+        return [title, textual_content]
+    
+    def parse_document_as_html(self, response):
+        url_title = self.get_document_title_from_url(response.url)
+        title = response.css('title::text').extract_first().strip() or url_title
+        elements = response.css('div::text, h1::text, h2::text, h3::text, h4::text, h5::text, h6::text, a::text, p::text').extract()
+        textual_content = ' '.join(elements)
+        return [title, textual_content]
+    
+    def parse_document_as_pdf(self, response):
+        reader = PdfFileReader(io.BytesIO(response.body))
+        title = reader.getDocumentInfo().title
+        title = title.strip() if title else self.get_document_title_from_url(response.url)
+        textual_content = ' '.join([page.extract_text() for page in reader.pages])
+        return [title, textual_content]
         
     def get_file_type(self, response):
         content_type = response.headers['Content-Type'].decode('UTF-8')

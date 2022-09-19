@@ -7,6 +7,7 @@ def get_countvectorizer(text, stopwords = [], ng_min = 1, ng_max = 1):
     return [X, count_vec]
 
 def get_tfidf(corpus, stopwords = [], ng_min = 1, ng_max = 1):
-    freq_vec = TfidfVectorizer(stop_words=stopwords, ngram_range=(ng_min, ng_max))
+    swords = stopwords if len(stopwords) > 0 else None
+    freq_vec = TfidfVectorizer(stop_words=swords, ngram_range=(ng_min, ng_max), strip_accents='unicode', decode_error='replace', min_df=5)
     X = freq_vec.fit_transform(corpus)
     return [X, freq_vec]
