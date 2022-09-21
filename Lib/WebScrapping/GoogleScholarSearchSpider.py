@@ -21,11 +21,11 @@ class GoogleScholarSearch(scrapy.Spider):
 
     def parse(self, response):        
         print(f"Running Google Search at {response.url}")
-        search_items = response.xpath('//div[@class="gs_r gs_or gs_scl"]').extract()
+        search_items = response.xpath('//div').extract()
         searches = []
         for search in search_items:
             selector = scrapy.Selector(text=search)
-            link = selector.css('.gs_or_ggsm > a::attr(href)').get()
+            link = selector.xpath('(//a::attr(href))[1]').get()
             if link:
                 searches.append(link)
         yield { "urls": searches }

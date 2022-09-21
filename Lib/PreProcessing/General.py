@@ -9,7 +9,7 @@ def remove_stop_words(content, sw_path):
     result = result.translate(translator)
     for word in stop_words:
         if word.startswith("`"):
-            result = re.sub(word.removeprefix("`"), " ", result)
+            result = result.replace(word.removeprefix("`"), " ")
         else:
             result = result.replace(f" {word} ", " ")
     result = re.sub(' +', ' ', result)

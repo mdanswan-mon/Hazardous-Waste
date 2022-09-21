@@ -5,6 +5,7 @@ import io
 import tempfile
 from PyPDF2 import PdfFileReader
 from urllib.parse import urlparse
+from urllib.parse import unquote
 
 class WebsiteKeywordAnalysis(scrapy.Spider):
     
@@ -42,7 +43,7 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
     def get_document_title_from_url(self, url):
         split_url = url.split('/')
         url_title = split_url[-1].strip()
-        return url_title
+        return unquote(url_title)
     
     def parse_document_general(self, response, file_type):
         title = self.get_document_title_from_url(response.url)
@@ -53,21 +54,21 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         finally:
             textual_content = textract.process(path).decode('utf-8')
             os.remove(path)
-        return [title, textual_content]
+        return [unquote(title), textual_content]
     
     def parse_document_as_html(self, response):
         url_title = self.get_document_title_from_url(response.url)
         title = response.css('title::text').extract_first().strip() or url_title
         elements = response.css('div::text, h1::text, h2::text, h3::text, h4::text, h5::text, h6::text, a::text, p::text').extract()
         textual_content = ' '.join(elements)
-        return [title, textual_content]
+        return [unquote(title), textual_content]
     
     def parse_document_as_pdf(self, response):
         reader = PdfFileReader(io.BytesIO(response.body))
         title = reader.getDocumentInfo().title
         title = title.strip() if title else self.get_document_title_from_url(response.url)
         textual_content = ' '.join([page.extract_text() for page in reader.pages])
-        return [title, textual_content]
+        return [unquote(title), textual_content]
         
     def get_file_type(self, response):
         content_type = response.headers['Content-Type'].decode('UTF-8')
