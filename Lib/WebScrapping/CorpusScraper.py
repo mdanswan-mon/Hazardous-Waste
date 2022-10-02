@@ -39,7 +39,7 @@ def get_tag_corpus(tags, pages=1, methods=['Search', 'Scholar'], publications=[]
     valid_webpages: list[Webpage] = list()
 
     for webpage in webpages:
-        if len(webpage.title) > 0 and len(webpage.textual_content) > 0 and len(webpage.textual_content) > 0:
+        if len(webpage.title) > 0 and len(webpage.textual_content) > 0:
             valid_webpages.append(webpage)
-
+            
     return valid_webpages
