@@ -6,6 +6,7 @@ import tempfile
 from PyPDF2 import PdfFileReader
 from urllib.parse import urlparse
 from urllib.parse import unquote
+from Lib.Utilities import PdfProcessing
 
 class WebsiteKeywordAnalysis(scrapy.Spider):
     
@@ -21,25 +22,44 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         
     def parse(self, response):
         print(f"Running keyword collection at {response.url}")
-        
+
         file_types = self.get_file_type(response)
         selected_file_type = next((sup_file_type for (sup_file_type, sup_file_type_strs) in self.supported_file_types.items() if self.get_match_in_lists(sup_file_type_strs, file_types)), None)
-        
-        if selected_file_type:
-            
-            clean_file_type = selected_file_type.removeprefix(".").capitalize()
-            title, textual_content = '', ''
-            
-            if clean_file_type in ['Html', 'Htm']:
-                title, textual_content = self.parse_document_as_html(response)
-            elif clean_file_type in ['Pdf']:
-                title, textual_content = self.parse_document_as_pdf(response)
-            else:
-                title, textual_content = self.parse_document_general(response, clean_file_type)
 
-            if len(clean_file_type) > 0 and len(title) > 0 and len(textual_content) > 0:
-                yield { "content" : [response.url, clean_file_type, title, textual_content] }
-    
+        if selected_file_type:
+
+            clean_file_type = selected_file_type.removeprefix(".").capitalize()
+            resource_title, textual_content, resource_save_path = '', '', ''
+            website_title = self.get_website_title(response)
+
+            if clean_file_type in ['Html', 'Htm']:
+                resource_title, textual_content = self.parse_document_as_html(response)
+            elif clean_file_type in ['Pdf']:
+                resource_title, textual_content = self.parse_document_as_pdf(response)
+                resource_save_path = self.save_pdf(response.body, resource_title)
+            else:
+                resource_title, textual_content = self.parse_document_general(response, clean_file_type)
+
+            if len(clean_file_type) > 0 and len(resource_title) > 0 and len(textual_content) > 0:
+                yield { "content" : [response.url, clean_file_type, website_title, resource_title, textual_content, resource_save_path] }
+
+    def save_pdf(self, bytes, title):
+        if title.lower().endswith('.pdf'):
+            resource_save_path = PdfProcessing.save_pdf(bytes, title.lower().removesuffix('.pdf'))
+        else:
+            resource_save_path = PdfProcessing.save_pdf(bytes, title)
+        return resource_save_path
+
+    def get_website_title(self, response):
+        url_title = self.get_document_title_from_url(response.url)
+        content_title = None
+        try:
+            content_title = response.css('title::text').extract_first().strip()
+            title = content_title or url_title
+        except:
+            title = url_title
+        return title
+
     def get_document_title_from_url(self, url):
         split_url = url.split('/')
         url_title = split_url[-1].strip()
@@ -57,10 +77,9 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         return [unquote(title), textual_content]
     
     def parse_document_as_html(self, response):
-        url_title = self.get_document_title_from_url(response.url)
-        title = response.css('title::text').extract_first().strip() or url_title
-        elements = response.css('div::text, h1::text, h2::text, h3::text, h4::text, h5::text, h6::text, a::text, p::text').extract()
-        textual_content = ' '.join(elements)
+        title = self.get_website_title(response)
+        elements = response.css('div::text, h1::text, h2::text, h3::text, h4::text, h5::text, h6::text, a::text, p::text, span::text, b::text, font::text').extract()
+        textual_content = '\n~`~\n'.join([element.strip() for element in elements if len(element.strip()) > 0])
         return [unquote(title), textual_content]
     
     def parse_document_as_pdf(self, response):

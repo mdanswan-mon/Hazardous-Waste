@@ -22,9 +22,11 @@ def get_tag_corpus(tags, pages=1, methods=['Search', 'Scholar'], publications=[]
         webpage_content = item['content']
         for webpage in webpages:
             if (webpage.url == webpage_content[0]):
-                webpage.type = webpage_content[1]
-                webpage.title = webpage_content[2]
-                webpage.textual_content = webpage_content[3]
+                webpage.resource_type = webpage_content[1]
+                webpage.website_title = webpage_content[2]
+                webpage.resource_title = webpage_content[3]
+                webpage.textual_content = webpage_content[4]
+                webpage.resource_save_path = webpage_content[5]
                 break
 
     if 'Search' in methods:
@@ -39,7 +41,7 @@ def get_tag_corpus(tags, pages=1, methods=['Search', 'Scholar'], publications=[]
     valid_webpages: list[Webpage] = list()
 
     for webpage in webpages:
-        if len(webpage.title) > 0 and len(webpage.textual_content) > 0:
+        if len(webpage.website_title) > 0 and len(webpage.resource_title) > 0 and len(webpage.textual_content) > 0:
             valid_webpages.append(webpage)
             
     return valid_webpages
