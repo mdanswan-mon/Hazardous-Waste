@@ -1,26 +1,32 @@
+import io
+import os
+import re
+import tempfile
+from urllib.parse import unquote, urlparse
+from scrapy.utils.python import to_native_str
+from six.moves.urllib.parse import urljoin
+
 import scrapy
 import textract
-import os
-import io
-import tempfile
-from PyPDF2 import PdfFileReader
-from urllib.parse import urlparse
-from urllib.parse import unquote
+from fpdf import FPDF
 from Lib.Utilities import PdfProcessing
+from PyPDF2 import PdfFileReader
 
 class WebsiteKeywordAnalysis(scrapy.Spider):
     
     name = 'WebsiteKeywordAnalysis'
     
     def __init__(self, *args, **kwargs):
-        self.base_url = kwargs['base_url']
+        self.urls = kwargs['urls']
         self.supported_file_types = { file_type.strip().split('=')[0]:file_type.strip().split('=')[1].split(',') for file_type in open('Resources/supported-file-types.txt', 'r').readlines() if not file_type.startswith("#") }
         super().__init__(self.name, **kwargs)
     
     def start_requests(self):
-        yield scrapy.Request(url=self.base_url, callback=self.parse)
+        for url in self.urls:
+            yield scrapy.Request(url=url, callback=self.parse)
         
     def parse(self, response):
+
         print(f"Running keyword collection at {response.url}")
 
         file_types = self.get_file_type(response)
@@ -34,6 +40,8 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
 
             if clean_file_type in ['Html', 'Htm']:
                 resource_title, textual_content = self.parse_document_as_html(response)
+                pdf_bytes = self.text_to_pdf_bytes(textual_content)
+                resource_save_path = self.save_pdf(pdf_bytes, resource_title)
             elif clean_file_type in ['Pdf']:
                 resource_title, textual_content = self.parse_document_as_pdf(response)
                 resource_save_path = self.save_pdf(response.body, resource_title)
@@ -41,13 +49,22 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
                 resource_title, textual_content = self.parse_document_general(response, clean_file_type)
 
             if len(clean_file_type) > 0 and len(resource_title) > 0 and len(textual_content) > 0:
-                yield { "content" : [response.url, clean_file_type, website_title, resource_title, textual_content, resource_save_path] }
+                url = response.request.meta['redirect_urls'][0] if 'redirect_urls' in response.request.meta else response.url
+                yield { "content" : [url, clean_file_type, website_title, resource_title, textual_content, resource_save_path] }
+
+    def text_to_pdf_bytes(self, text):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_xy(0, 0)
+        pdf.set_font('arial', 'B', 12.0)
+        latin_encoded_text = text.encode('latin-1', 'ignore').decode('latin-1')
+        pdf.multi_cell(h = 5.0, align='J', w = 0, txt=latin_encoded_text, border=0)
+        bytes = pdf.output(dest='S').encode('latin-1')
+        return bytes
 
     def save_pdf(self, bytes, title):
-        if title.lower().endswith('.pdf'):
-            resource_save_path = PdfProcessing.save_pdf(bytes, title.lower().removesuffix('.pdf'))
-        else:
-            resource_save_path = PdfProcessing.save_pdf(bytes, title)
+        title = re.sub('.pdf', '', title, flags=re.IGNORECASE)
+        resource_save_path = PdfProcessing.save_pdf(bytes, title)
         return resource_save_path
 
     def get_website_title(self, response):
@@ -61,8 +78,9 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         return title
 
     def get_document_title_from_url(self, url):
-        split_url = url.split('/')
-        url_title = split_url[-1].strip()
+        split_url = url.split('/')[-1].strip()
+        split_url_wo_query = split_url.split('?')[0].strip()
+        url_title = split_url_wo_query
         return unquote(url_title)
     
     def parse_document_general(self, response, file_type):
@@ -79,11 +97,17 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
     def parse_document_as_html(self, response):
         title = self.get_website_title(response)
         elements = response.css('div::text, h1::text, h2::text, h3::text, h4::text, h5::text, h6::text, a::text, p::text, span::text, b::text, font::text').extract()
-        textual_content = '\n~`~\n'.join([element.strip() for element in elements if len(element.strip()) > 0])
+        textual_content = '~`~'.join([element.strip() for element in elements if len(element.strip())])
         return [unquote(title), textual_content]
     
     def parse_document_as_pdf(self, response):
         reader = PdfFileReader(io.BytesIO(response.body))
+        if reader.is_encrypted:
+            try:
+                if reader.decrypt('') == 0:
+                    return ["", ""]
+            except:
+                return ["", ""]
         title = reader.getDocumentInfo().title
         title = title.strip() if title else self.get_document_title_from_url(response.url)
         textual_content = ' '.join([page.extract_text() for page in reader.pages])
