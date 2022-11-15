@@ -10,7 +10,7 @@
 | bd940e5 | 29/08/2022 |
 | e0d4d43 | 24/08/2022 |
 ## Summary
-In Version 0.4, the following components were added: stop word processing was, Google Scholar scraping, and keyword extraction techniques testing. Further testing and prototyping was done to improve the reliability and consistency of the web scrapping foundations.
+In Version 0.4, the following components were added: stop word processing, Google Scholar scraping, and keyword extraction techniques testing. Further testing and prototyping was done to improve the reliability and consistency of the web scrapping foundations.
 ## Results
 Currently, the web scrapping system can retrieve all common documents from google search (html/htm, pdf, doc/docx, etc) and process those document to retrieve x keywords of the documents using **Yake** and **KeyBERT**. 
 ___
