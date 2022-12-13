@@ -20,6 +20,7 @@ def write_webpages_to_csv(webpages : List[Webpage], save_path: str ="Output"):
         writer = csv.writer(csv_file)
         for webpage in webpages:
             writer.writerow([webpage.url])
+    return abs_path
             
 def write_search_results_to_json(webpages : List[Webpage], tags: List, pages: int, search_time: str, save_path: str ="Output"):
     base_path = PathHelpers.build_folder_path(save_path)
@@ -28,6 +29,7 @@ def write_search_results_to_json(webpages : List[Webpage], tags: List, pages: in
     with open(abs_path, 'w+') as json_file:
         website_dict = dict()
         for webpage in webpages:
-            website_dict[webpage.url] = { "WebsiteTitle" : webpage.website_title, "ResourceTitle" : webpage.resource_title, "ResourceType" : webpage.resource_type, "ResourceSavePath" : webpage.resource_save_path, "DOI" : webpage.doi, "Abstract" : webpage.abstract, "cross_ref_data": webpage.cross_ref_data }
+            website_dict[webpage.url] = { "WebsiteTitle" : webpage.website_title, "ResourceTitle" : webpage.resource_title, "ResourceType" : webpage.resource_type, "ResourceSavePath" : webpage.resource_save_path, "DOI" : webpage.doi, "Abstract" : webpage.abstract, "CrossRefData": webpage.cross_ref_data, "Text" : webpage.textual_content }
         search_results_dict = { "SearchParams" : { "Tags" : tags, "Pages" : pages, "SavePath" : save_path }, "Data" : website_dict, "Diagnostics" : { "SearchTimeTakenInSeconds" : search_time } }
         json.dump(search_results_dict, json_file, indent=4)
+    return abs_path

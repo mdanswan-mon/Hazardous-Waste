@@ -39,8 +39,6 @@ def get_abstract_from_cr_data(cross_ref_json: str):
     return abstract
 
 # TODO: abstract out preprocessing of cross_ref_json data (mainly new_str = unicodedata.normalize("NFKD", unicode_str) - https://stackoverflow.com/questions/10993612/how-to-remove-xa0-from-string-in-python)
-# TODO: add formatting back to html page (between elements) 
-# TODO: add two functions (a more general function dedicated to getting the abstract from a webpage object, and, a function to get the abstract from the html page)
 
 def get_abstract_from_text(text: str):
     abstract = ""

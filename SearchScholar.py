@@ -1,5 +1,14 @@
 import argparse
+import logging
 import sys
+from time import perf_counter
+
+from Lib.TextAnalytics.Methods import *
+from Lib.Utilities import Output
+from Lib.WebScrapping.CorpusScraper import *
+from Lib.WebScrapping.GoogleSearchSpider import *
+from Lib.WebScrapping.SpiderInstance import *
+from Lib.WebScrapping.WebsiteKeywordAnalysisSpider import *
 
 # argparser = argparse.ArgumentParser()
 # argparser.add_argument('--tags', '-t', nargs='+', help='Tags for keyword search', required=True)
@@ -11,30 +20,16 @@ import sys
 # pages = args.pages
 # ng_max = args.n_gram_max
 # save_path = args.save_path
-tags = ['microplastic', 'waste', 'hazard', 'marine']
-pages = 5
-ng_max = 1
-save_path = "./Output"
-
-import logging
-from time import perf_counter
-
-from Lib.TextAnalytics.Methods import *
-from Lib.Utilities import Output
-from Lib.WebScrapping.CorpusScraper import *
-from Lib.WebScrapping.GoogleSearchSpider import *
-from Lib.WebScrapping.SpiderInstance import *
-from Lib.WebScrapping.WebsiteKeywordAnalysisSpider import *
 
 logging.disable(sys.maxsize)
 
-gtc_start = perf_counter()
-webpages = get_tag_corpus(tags, pages, methods=['Scholar'], from_year=2015)
-gtc_finish = perf_counter()
+def search_scholar(tags, pages, from_year = 2015, to_year = 2022):
+    
+    gtc_start = perf_counter()
+    webpages = get_tag_corpus(tags, pages, methods=['Scholar'], from_year=from_year, to_year=to_year)
+    gtc_finish = perf_counter()
 
-website_dict = dict()
+    search_time = f"{gtc_finish - gtc_start:0.3f}"
 
-search_time = f"{gtc_finish - gtc_start:0.3f}"
-
-Output.write_webpages_to_csv(webpages)
-Output.write_search_results_to_json(webpages, tags, pages, search_time)
+    Output.write_webpages_to_csv(webpages)
+    return Output.write_search_results_to_json(webpages, tags, pages, search_time)

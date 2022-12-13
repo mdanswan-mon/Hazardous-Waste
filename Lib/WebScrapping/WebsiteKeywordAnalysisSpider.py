@@ -92,13 +92,13 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         finally:
             textual_content = textract.process(path).decode('utf-8')
             os.remove(path)
-        return [unquote(title), textual_content]
+        return [unquote(title), textual_content.strip()]
     
     def parse_document_as_html(self, response):
         title = self.get_website_title(response)
         elements = response.css('div::text, h1::text, h2::text, h3::text, h4::text, h5::text, h6::text, a::text, p::text, span::text, b::text, font::text').extract()
         textual_content = '~`~'.join([element.strip() for element in elements if len(element.strip())])
-        return [unquote(title), textual_content]
+        return [unquote(title), textual_content.strip()]
     
     def parse_document_as_pdf(self, response):
         reader = PdfFileReader(io.BytesIO(response.body))
@@ -111,7 +111,7 @@ class WebsiteKeywordAnalysis(scrapy.Spider):
         title = reader.getDocumentInfo().title
         title = title.strip() if title else self.get_document_title_from_url(response.url)
         textual_content = ' '.join([page.extract_text() for page in reader.pages])
-        return [unquote(title), textual_content]
+        return [unquote(title), textual_content.strip()]
         
     def get_file_type(self, response):
         content_type = response.headers['Content-Type'].decode('UTF-8')
