@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 
 sns.set_style('darkgrid')
 
-def cluster_documents(document_keyword_matrix, vocabulary, n_clusters = 5, top_n_keywords = 10):
+def visualize_document_keyword_clusters(document_keyword_matrix, vocabulary, n_clusters = 5, top_n_keywords = 10):
     
     pca = PCA(2)
     pca_results = pca.fit_transform(document_keyword_matrix)

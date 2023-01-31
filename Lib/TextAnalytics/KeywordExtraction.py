@@ -1,4 +1,5 @@
 import json
+import csv
 
 import numpy as np
 from Lib.PreProcessing.General import *
@@ -24,4 +25,4 @@ def extract_keywords_from_results(json_filepath):
         for idx, row in enumerate(keywords[:, 1]):
             keybert_results[idx] = get_keyword_mask(vocabulary, row)
         
-        return (keybert_results, vocabulary)
+        return (corpus.keys(), keybert_results, vocabulary)

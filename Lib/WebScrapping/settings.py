@@ -1,1 +1,4 @@
-USER_AGENT='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.47'
+USER_AGENT='Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/106.0.0.0 Edg/106.0.1370.47'
+DOWNLOAD_DELAY=3
+COOKIES_ENABLED=True
+DNSCACHE_ENABLED=False

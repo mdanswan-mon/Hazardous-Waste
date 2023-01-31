@@ -47,10 +47,4 @@ def get_tag_corpus(tags, pages=1, methods=['Search', 'Scholar'], publications=[]
                             [lambda: { "tags": tags, "pages": pages, "pubs": [], "from_year": from_year, "to_year": to_year }, \
                             lambda: { "urls": [webpage.url for webpage in webpages] }])
 
-    # valid_webpages: list[Webpage] = list()
-
-    # for webpage in webpages:
-    #     if len(webpage.website_title) > 0 and len(webpage.resource_title) > 0 and len(webpage.textual_content) > 0:
-    #         valid_webpages.append(webpage)
-            
     return webpages

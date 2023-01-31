@@ -6,7 +6,7 @@ class GoogleScholarSearch(scrapy.Spider):
     name = 'GoogleScholarSearch'
     
     def __init__(self, *args, **kwargs):
-        self.base_url = "https://scholar.google.com.au/scholar?as_q={0}&as_publication={1}&as_ylo={2}&as_yhi={3}&start={4}"
+        self.base_url = "https://scholar.google.com/scholar?as_q={0}&as_publication={1}&as_ylo={2}&as_yhi={3}&start={4}"
         self.tags = kwargs['tags']
         self.pages = kwargs['pages']
         self.publications = kwargs['pubs']
